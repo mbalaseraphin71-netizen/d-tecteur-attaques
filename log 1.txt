@@ -1,0 +1,35 @@
+Failed password from 192.168.1.5
+Failed password from 192.168.1.5
+Failed password from 192.168.1.5
+Invalid user admin from 10.0.0.9
+Accepted password for root from 172.16.0.1
+May 02 09:00:01 server sshd: Failed password for root from 192.168.1.10 port 44312 ssh2
+May 02 09:00:05 server sshd: Failed password for root from 192.168.1.10 port 44312 ssh2
+May 02 09:00:10 server sshd: Failed password for root from 192.168.1.10 port 44312 ssh2
+May 02 09:01:22 server sshd: Invalid user admin from 45.88.12.3 port 51221 ssh2
+May 02 09:01:25 server sshd: Invalid user admin from 45.88.12.3 port 51221 ssh2
+May 02 09:02:45 server sshd: Accepted password for root from 10.0.0.5 port 22104 ssh2
+May 02 09:05:14 server sshd: Failed password for user_test from 172.16.0.5 port 39822 ssh2
+May 02 09:05:20 server sshd: Failed password for user_test from 172.16.0.5 port 39822 ssh2
+May 02 09:08:02 server sshd: Failed password for root from 192.168.1.10 port 44500 ssh2
+May 02 09:08:07 server sshd: Failed password for root from 192.168.1.10 port 44500 ssh2
+May 02 09:10:45 server sshd: Invalid user guest from 82.120.45.67 port 55432 ssh2
+May 02 09:10:48 server sshd: Invalid user guest from 82.120.45.67 port 55432 ssh2
+May 02 09:10:52 server sshd: Invalid user guest from 82.120.45.67 port 55432 ssh2
+May 02 09:15:30 server sshd: Failed password for root from 192.168.1.10 port 44610 ssh2
+May 02 09:18:12 server sshd: Invalid user support from 103.45.12.9 port 41002 ssh2
+May 02 09:20:05 server sshd: Accepted password for root from 192.168.1.1 port 22 ssh2
+May 02 09:22:18 server sshd: Failed password for admin from 45.88.12.3 port 51300 ssh2
+May 02 09:25:40 server sshd: Failed password for user1 from 192.168.1.50 port 33211 ssh2
+May 02 09:28:01 server sshd: Failed password for root from 193.168.1.12 port 44312 ssh2
+May 02 09:28:05 server sshd: Failed password for root from 193.168.1.12 port 44312 ssh2
+May 02 09:28:10 server sshd: Failed password for root from 193.168.1.12 port 44312 ssh2
+May 02 09:30:22 server sshd: Invalid user database from 45.88.12.3 port 51221 ssh2
+May 02 09:32:14 server sshd: Failed password for dev_user from 172.16.0.5 port 39822 ssh2
+May 02 09:35:02 server sshd: Failed password for root from 193.168.1.12 port 44500 ssh2
+May 02 09:38:45 server sshd: Invalid user oracle from 82.120.45.67 port 55432 ssh2
+May 02 09:40:30 server sshd: Failed password for root from 193.168.1.12 port 44610 ssh2
+May 02 09:42:12 server sshd: Invalid user ftp_user from 103.45.12.9 port 41002 ssh2
+May 02 09:45:05 server sshd: Accepted password for root from 10.0.0.8 port 22 ssh2
+May 02 09:48:18 server sshd: Failed password for admin from 45.88.12.3 port 51300 ssh2
+May 02 09:50:40 server sshd: Failed password for user2 from 192.168.1.55 port 33211 ssh2
