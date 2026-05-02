@@ -138,9 +138,9 @@ def lancer_interface():
         messagebox.showinfo("Succès", "Rapports PDF générés avec succès !")
 
     # Boutons d'action
-    tk.Button(fenetre, text="🔍 ANALYSER", command=analyser_tout, bg="blue", fg="white", width=20).pack(pady=5)
-    tk.Button(fenetre, text="📄 GÉNÉRER PDF", command=exporter_pdf, bg="green", fg="white", width=20).pack(pady=5)
-    tk.Button(fenetre, text="ℹ️ À PROPOS", command=afficher_aide, bg="#555555", fg="white", width=20).pack(pady=10)
+    tk.Button(fenetre, text=" ANALYSER", command=analyser_tout, bg="blue", fg="white", width=20).pack(pady=5)
+    tk.Button(fenetre, text=" GÉNÉRER PDF", command=exporter_pdf, bg="green", fg="white", width=20).pack(pady=5)
+    tk.Button(fenetre, text=" À PROPOS", command=afficher_aide, bg="#555555", fg="white", width=20).pack(pady=10)
 
     fenetre.mainloop()
 
