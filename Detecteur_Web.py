@@ -1,16 +1,36 @@
 import re
+import os
 import streamlit as st
 from fpdf import FPDF
 
-# --- 1. LOGIQUE D'ANALYSE ---
+# --- 1. LOGIQUE D'ANALYSE DYNAMIQUE ---
+
+def charger_blacklist():
+    """Charge dynamiquement les IP de la blacklist depuis le fichier local."""
+    blacklist_locale = []
+    nom_fichier = "blacklist.txt"
+    
+    # Vérifie si le fichier existe pour éviter un crash de l'application
+    if os.path.exists(nom_fichier):
+        with open(nom_fichier, "r", encoding="utf-8") as f:
+            for ligne in f:
+                ip = ligne.strip()
+                # On ne garde que les lignes non vides et qui ne sont pas des commentaires
+                if ip and not ip.startswith("#"):
+                    blacklist_locale.append(ip)
+    else:
+        # Valeurs de secours si le fichier n'est pas trouvé
+        blacklist_locale = ["192.168.1.50", "10.0.0.99", "45.75.12.3"]
+        
+    return blacklist_locale
 
 def analyser_logs(logs):
     brute_force = {}
     utilisateurs_inconnus = {}
     connexions_root = []
     
-    # Simulation d'une blacklist locale (Objectif L1)
-    blacklist = ["192.168.1.50", "10.0.0.99", "45.75.12.3"]
+    # Appel de la fonction dynamique
+    blacklist = charger_blacklist()
 
     for ligne in logs:
         if isinstance(ligne, bytes):
@@ -35,7 +55,7 @@ def analyser_logs(logs):
 
     return brute_force, utilisateurs_inconnus, connexions_root
 
-# --- 2. GÉNERATION PDF CORRIGÉE (fpdf2) ---
+# --- 2. GÉNÉRATION PDF CORRIGÉE (fpdf2) ---
 
 def generer_pdf_web(brute_force, utilisateurs_inconnus, connexions_root, nom_log):
     pdf = FPDF()
@@ -66,7 +86,6 @@ def generer_pdf_web(brute_force, utilisateurs_inconnus, connexions_root, nom_log
     pdf.cell(200, 10, "2. Connexions Root Acceptees", ln=True)
     pdf.set_font("Courier", size=9)
     
-    # Correction de l'indentation ici
     if not connexions_root:
         pdf.cell(200, 8, "Aucune connexion root detectee.", ln=True)
     for ligne in connexions_root:
@@ -135,7 +154,6 @@ if fichiers_charges:
 
 # Barre latérale informative pour les bourses / recruteurs
 with st.sidebar:
-    # Utilisation d'un vrai lien de badge SVG généré proprement
     st.image("https://shields.io")
     st.title("Framework de Validation")
     st.markdown("""
@@ -143,6 +161,7 @@ with st.sidebar:
     - Analyse de logs SSH standard
     - Détection brute force heuristique
     - Extraction des élévations de privilèges
+    - Blacklist dynamique intégrée
     ---
     *© 2026 - Séraphin Mbala*
     """)
