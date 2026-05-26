@@ -62,7 +62,7 @@ pip install -r requirements.txt
 ### 3. Exécution de l'application
 Lancez le serveur local Streamlit via l'interpréteur Python :
 ```bash
-python -m streamlit run Detecteur_Web.py
+py -m streamlit run Detecteur_Web.py
 ```
 
 ---
