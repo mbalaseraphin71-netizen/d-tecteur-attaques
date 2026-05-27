@@ -1,77 +1,85 @@
-#  CyberSentinel : Analyseur de Logs & Détecteur d'Attaques Multi-Logs
+#  AfriKore Security : African Cyber Defense Framework & Log Analyzer
 
-##  Description
-**CyberSentinel** est une application web de cybersécurité développée en Python permettant d'analyser des fichiers de logs (serveurs, SSH) pour détecter des activités suspectes en temps réel. L'outil automatise la détection de menaces courantes (Brute Force, élévation de privilèges) et génère des rapports de sécurité professionnels exportables au format PDF.
-
-Ce projet s'inscrit dans le cadre de la validation des compétences pratiques de niveau **Ingénieur Cybersécurité - Étape L1**.
-
----
-
-## Fonctionnalités Opérationnelles (Version L1)
-
-### Analyse de Sécurité & Heuristique
-* **Détection de Brute Force SSH** : Identification automatique des adresses IP effectuant des tentatives répétées d'accès infructueuses.
-* **Extraction de Profils** : Filtrage et isolation des tentatives de connexion via des utilisateurs invalides ou inconnus.
-* **Alerte d'Élévation de Privilèges** : Surveillance critique des accès réussis en tant qu'utilisateur `root`.
-
-### Gestion de Blacklist (Nouveauté L1)
-* **Contrôle de Réputation** : Confrontation des adresses IP extraites avec une liste noire de serveurs malveillants connus (`blacklist.txt`).
-* **Marquage des Menaces** : Signalement instantané des machines déjà répertoriées dans le système de surveillance.
-
-###  Interface Web Moderne (Streamlit)
-* **Tableau de Bord Intuitif** : Visualisation claire via des indicateurs de performance (cartes de score dynamiques).
-* **Analyse Multi-Logs** : Zone de dépôt de fichiers (*Drag & Drop*) supportant le traitement simultané de plusieurs fichiers `.log` ou `.txt`.
-
-### Rapports Automatisés
-* **Génération PDF Native** : Export en un clic d'un rapport d'incident structuré et épuré.
-* **Indicateurs de Risque** : Classification automatisée des adresses IP suspectes par niveau de menace (SUSPECT / DANGER-ATTAQUE).
+<p align="center">
+  <img src="https://shields.io" alt="Python Version">
+  <img src="https://shields.io" alt="Streamlit">
+  <img src="https://shields.io" alt="Security Level">
+  <img src="https://shields.io" alt="Sovereign Infrastructure">
+</p>
 
 ---
 
-## Logique de Détection & Seils
+##  Project Overview
+**AfriKore Security** is an automated cybersecurity web application developed in Python. It parses and analyzes network server logs (such as SSH logs) to detect malicious activities in real time. The engine automates threat detection (Brute Force, privilege escalation) and generates production-ready, downloadable PDF security compliance reports.
 
-* **Seuil d'Alerte Brute Force** : Déclenché à partir de $\ge 3$ tentatives de connexion échouées (`failed password`).
-* **Analyse Lexicale** : Isolation des connexions via des comptes non enregistrés grâce au mot-clé `invalid user`.
-* **Analyse Syntaxique** : Extraction de précision des adresses IPv4 par expressions régulières (Regex).
-
----
-
-## Technologies Utilisées
-
-* **Langage principal** : Python 3.14+
-* **Framework Web UI** : Streamlit (Architecture Cloud & Locale)
-* **Moteur PDF** : fpdf2 (Génération de rapports sécurisés sans crash d'encodage)
-* **Traitement de données** : Module natif `re` (Expressions Régulières Python)
+This software repository serves as a practical engineering validation for **Cybersecurity & Sovereign Digital Infrastructure - Level L1**.
 
 ---
 
-## Installation et Lancement en Local
+## 🚀 Core Features (L1 Operational Version)
 
-### 1. Clonage du projet
+###  Threat Intelligence & Heuristic Analysis
+*   **SSH Brute Force Detection**: Automatic extraction of source IPv4 addresses attempting repetitive unauthorized access.
+*   **Invalid Profiling Filtering**: Automated isolation of connections originating from unregistered or illegal usernames.
+*   **Privilege Escalation Monitoring**: Critical tracking and tracking of successful `root` access logs.
+*   **Dynamic Reputation Control**: Real-time cross-referencing of extracted IPs against a localized threat intelligence blacklist (`blacklist.txt`).
+
+### Modern Web UI Engine (Streamlit)
+*   **Interactive Dashboard**: High-level security metrics displayed via responsive, color-coded scorecards.
+*   **Multi-Log Processing**: Drag & Drop upload container supporting concurrent processing of multiple `.log` or `.txt` dumps.
+
+###  Automated Compliance Reporting
+*   **Native PDF Generator**: One-click generation of an incident response report without encoding errors (powered by `fpdf2`).
+*   **Risk Classification**: Automated tagging of suspicious machines by threat score (SUSPECT / DANGER-ATTACK).
+
+---
+
+##  Detection Thresholds & Logic
+
+*   **Brute Force Threshold**: Triggered automatically when an IP matches $\ge 3$ failed password attempts (`failed password`).
+*   **Syntax & Parsing Rules**: High-fidelity IPv4 extraction built entirely on native Regular Expressions (`re` module).
+*   **Sovereign Logic**: Configured to work in air-gapped or localized environments without relying on third-party cloud infrastructure.
+
+---
+
+##  Technology Stack
+
+*   **Language**: Python 3.14+
+*   **Framework UI**: Streamlit (Cloud & Local Architecture)
+*   **PDF Core Engine**: fpdf2 (Robust corporate reporting)
+*   **Pattern Matching**: Native Python Regular Expressions (`re`)
+
+---
+
+##  Installation & Local Deployment
+
+### 1. Clone the repository
 ```bash
 git clone https://github.com
-cd CyberSentinel
+cd AfriKore-Security
 ```
 
-### 2. Installation des dépendances
-Installez les bibliothèques requises listées dans le fichier de configuration :
+### 2. Install dependencies
+Install the required production packages specified in the environment file:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Exécution de l'application
-Lancez le serveur local Streamlit via l'interpréteur Python :
+### 3. Run the application
+Launch the local Streamlit server using the Python module execution flag:
 ```bash
-py -m streamlit run Detecteur_Web.py
+python -m streamlit run Detecteur_Web.py
 ```
 
 ---
 
-## Feuille de Route du Projet (Roadmap)
+##  Strategic Venture Roadmap (L1 to L5 Enterprise Goal)
 
-* [x] **Étape L1 (Actuelle)** : Stabilisation du code web, intégration de la logique de blacklist locale, génération de rapports PDF robustes (fpdf2) et déploiement Streamlit Cloud.
-* [ ] **Étape L2** : Implémentation d'un module d'authentification sécurisé, base de données relationnelle pour l'historique des alertes et connexion à des API de Threat Intelligence.
-* [ ] **Étape L3** : Conteneurisation (Docker), monitoring réseau en temps réel et détection d'anomalies par apprentissage automatique (IA Sécurité).
+*   [x] **Phase L1 (Current)**: Core parsing engine stabilization, dynamic local blacklisting, and production web deployment.
+*   [ ] **Phase L2**: Implementation of a cryptographically secure user authentication module, relational database (PostgreSQL) logging history, and VirusTotal Threat Intelligence API hooks.
+*   [ ] **Phase L3**: Architecture containerization via Docker, live packet monitoring (real-time traffic analysis), and ML-driven network anomaly detection.
+*   [ ] **Phase L4 - L5**: Enterprise scaling, deployment on sovereign African servers, infrastructure auditing, and full commercialization of the **AfriKore Security Suite**.
 
 ---
-*Développé avec rigueur par **Séraphin Mbala** | Profil Ingénieur Cybersécurité © 2026*
+*« Protect Content, Empower Sovereign Infrastructure »*  
+**Engineered with absolute rigor by Séraphin Mbala** | Future Cybersecurity Engineer © 2026
