@@ -1,4 +1,4 @@
-#  AfriKore Security : African Cyber Defense Framework & Log Analyzer
+# AfriKore Security : African Cyber Defense Framework & Log Analyzer
 
 <p align="center">
   <img src="https://shields.io" alt="Python Version">
@@ -9,65 +9,55 @@
 
 ---
 
-##  Project Overview
-**AfriKore Security** is an automated cybersecurity web application developed in Python. It parses and analyzes network server logs (such as SSH logs) to detect malicious activities in real time. The engine automates threat detection (Brute Force, privilege escalation) and generates production-ready, downloadable PDF security compliance reports.
+##  Version Française
 
-This software repository serves as a practical engineering validation for **Cybersecurity & Sovereign Digital Infrastructure - Level L1**.
+###  Présentation du Projet
+**AfriKore Security** est une application web de cybersécurité automatisée développée en Python. Elle analyse les fichiers de logs réseau (comme les logs SSH) pour détecter les activités malveillantes en temps réel. L'outil automatise la détection des menaces (Force Brute, élévation de privilèges) et génère des rapports de conformité PDF téléchargeables.
 
----
+Ce projet s'inscrit dans le cadre de la validation des compétences pratiques de niveau **Ingénieur Cybersécurité - Étape L1**.
 
-## 🚀 Core Features (L1 Operational Version)
+###  Fonctionnalités Opérationnelles (Version L1)
+*   **Analyse Heuristique & Menaces** : Extraction automatique des adresses IPv4 et blocage des tentatives d'accès répétées.
+*   **Contrôle de Réputation** : Confrontation en temps réel des IP avec une liste locale de menaces (`blacklist.txt`).
+*   **Tableau de Bord Streamlit** : Indicateurs de performance dynamiques et clairs via des cartes de score de couleur.
+*   **Rapports PDF Automatisés** : Génération en un clic d'un rapport d'incident structuré (propulsé par `fpdf2`).
 
-###  Threat Intelligence & Heuristic Analysis
-*   **SSH Brute Force Detection**: Automatic extraction of source IPv4 addresses attempting repetitive unauthorized access.
-*   **Invalid Profiling Filtering**: Automated isolation of connections originating from unregistered or illegal usernames.
-*   **Privilege Escalation Monitoring**: Critical tracking and tracking of successful `root` access logs.
-*   **Dynamic Reputation Control**: Real-time cross-referencing of extracted IPs against a localized threat intelligence blacklist (`blacklist.txt`).
+###  Logique de Détection & Seuils
+*   **Alerte Brute Force** : Se déclenche automatiquement à partir de $\ge 3$ tentatives de connexion échouées (`failed password`).
+*   **Analyse Syntaxique** : Extraction de précision des adresses IPv4 par expressions régulières native (`re`).
 
-### Modern Web UI Engine (Streamlit)
-*   **Interactive Dashboard**: High-level security metrics displayed via responsive, color-coded scorecards.
-*   **Multi-Log Processing**: Drag & Drop upload container supporting concurrent processing of multiple `.log` or `.txt` dumps.
-
-###  Automated Compliance Reporting
-*   **Native PDF Generator**: One-click generation of an incident response report without encoding errors (powered by `fpdf2`).
-*   **Risk Classification**: Automated tagging of suspicious machines by threat score (SUSPECT / DANGER-ATTACK).
-
----
-
-##  Detection Thresholds & Logic
-
-*   **Brute Force Threshold**: Triggered automatically when an IP matches $\ge 3$ failed password attempts (`failed password`).
-*   **Syntax & Parsing Rules**: High-fidelity IPv4 extraction built entirely on native Regular Expressions (`re` module).
-*   **Sovereign Logic**: Configured to work in air-gapped or localized environments without relying on third-party cloud infrastructure.
-
----
-
-##  Technology Stack
-
-*   **Language**: Python 3.14+
-*   **Framework UI**: Streamlit (Cloud & Local Architecture)
-*   **PDF Core Engine**: fpdf2 (Robust corporate reporting)
-*   **Pattern Matching**: Native Python Regular Expressions (`re`)
-
----
-
-##  Installation & Local Deployment
-
-### 1. Clone the repository
+###  Installation et Lancement Local
 ```bash
 git clone https://github.com
 cd AfriKore-Security
-```
-
-### 2. Install dependencies
-Install the required production packages specified in the environment file:
-```bash
 pip install -r requirements.txt
+python -m streamlit run Detecteur_Web.py
 ```
 
-### 3. Run the application
-Launch the local Streamlit server using the Python module execution flag:
+---
+
+## 🇬🇧 English Version
+
+###  Project Overview
+**AfriKore Security** is an automated cybersecurity web application developed in Python. It parses and analyzes network server logs (such as SSH logs) to detect malicious activities in real time. The engine automates threat detection (Brute Force, privilege escalation) and generates production-ready, downloadable PDF security compliance reports.
+
+This repository serves as a practical engineering validation for **Cybersecurity & Sovereign Digital Infrastructure - Level L1**.
+
+###  Core Features (L1 Operational Version)
+*   **Threat Intelligence & Heuristics**: Automatic extraction of source IPv4 addresses attempting repetitive unauthorized access.
+*   **Dynamic Reputation Control**: Real-time cross-referencing of extracted IPs against a localized threat blacklist (`blacklist.txt`).
+*   **Streamlit Web UI**: High-level security metrics displayed via responsive, color-coded scorecards.
+*   **Compliance Reporting**: One-click generation of an incident response report without encoding errors (`fpdf2`).
+
+###  Detection Thresholds & Logic
+*   **Brute Force Threshold**: Triggered automatically when an IP matches $\ge 3$ failed password attempts.
+*   **Syntax & Parsing Rules**: High-fidelity IPv4 extraction built entirely on native Regular Expressions (`re` module).
+
+### Installation & Local Deployment
 ```bash
+git clone https://github.com
+cd AfriKore-Security
+pip install -r requirements.txt
 python -m streamlit run Detecteur_Web.py
 ```
 
@@ -75,10 +65,10 @@ python -m streamlit run Detecteur_Web.py
 
 ##  Strategic Venture Roadmap (L1 to L5 Enterprise Goal)
 
-*   [x] **Phase L1 (Current)**: Core parsing engine stabilization, dynamic local blacklisting, and production web deployment.
-*   [ ] **Phase L2**: Implementation of a cryptographically secure user authentication module, relational database (PostgreSQL) logging history, and VirusTotal Threat Intelligence API hooks.
-*   [ ] **Phase L3**: Architecture containerization via Docker, live packet monitoring (real-time traffic analysis), and ML-driven network anomaly detection.
-*   [ ] **Phase L4 - L5**: Enterprise scaling, deployment on sovereign African servers, infrastructure auditing, and full commercialization of the **AfriKore Security Suite**.
+*   [x] **Phase L1 (Current / Actuelle)**: Core parsing engine stabilization, dynamic local blacklisting, and production web deployment. / *Stabilisation du code web, intégration de la logique de blacklist locale et déploiement cloud.*
+*   [ ] **Phase L2**: User authentication module, PostgreSQL logging history, and Threat Intelligence API hooks (VirusTotal). / *Module d'authentification sécurisé, base de données relationnelle et connexion aux API.*
+*   [ ] **Phase L3**: Architecture containerization via Docker, live packet monitoring, and ML-driven network anomaly detection. / *Conteneurisation (Docker), monitoring réseau en temps réel et détection d'anomalies par IA.*
+*   [ ] **Phase L4 - L5**: Enterprise scaling, deployment on sovereign African servers, infrastructure auditing, and full commercialization of the **AfriKore Security Suite**. / *Déploiement sur des serveurs souverains africains, audits d'infrastructure et création de l'entreprise.*
 
 ---
 *« Protect Content, Empower Sovereign Infrastructure »*  
