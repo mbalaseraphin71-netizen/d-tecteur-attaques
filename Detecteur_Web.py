@@ -61,9 +61,9 @@ def generer_pdf_web(brute_force, utilisateurs_inconnus, connexions_root, nom_log
     pdf = FPDF()
     pdf.add_page()
     
-    # En-tête (Suppression des accents pour éviter les crashs d'encodage)
+    # En-tête du rapport officiel AfriKore
     pdf.set_font("Arial", "B", 18)
-    pdf.cell(200, 10, "RAPPORT DE SECURITE - CYBERSENTINEL", ln=True, align="C")
+    pdf.cell(200, 10, "RAPPORT DE SECURITE - AFRIKORE SECURITY", ln=True, align="C")
     
     pdf.set_font("Arial", "I", 12)
     pdf.cell(200, 10, f"Fichier analyse : {nom_log}", ln=True, align="C")
@@ -91,77 +91,76 @@ def generer_pdf_web(brute_force, utilisateurs_inconnus, connexions_root, nom_log
     for ligne in connexions_root:
         pdf.cell(200, 7, f"> {ligne[:80]}", ln=True)
 
-    # Conversion explicite en bytes valide pour fpdf2
     return bytes(pdf.output())
 
 
 # --- 3. INTERFACE WEB (Streamlit) ---
 
-st.set_page_config(page_title="CyberSentinel - Séraphin Mbala", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="AfriKore Security - Séraphin Mbala", page_icon="🔐", layout="wide")
 
-st.title("🛡️ CyberSentinel : Analyseur de Logs")
-st.caption("Développé par **SÉRAPHIN MBALA** | Profil Enseignant & Ingénieur Cybersécurité")
+st.title("🔐 AfriKore Security : Log Analyzer & Cyber Shield")
+st.caption("Développé par **SÉRAPHIN MBALA** | Infrastructure & Souveraineté Numérique Africaine")
 
-fichiers_charges = st.file_uploader("Glissez vos fichiers .log ou .txt ici", accept_multiple_files=True)
+fichiers_charges = st.file_uploader("Glissez vos fichiers de logs (.log, .txt, auth.log) ici", accept_multiple_files=True)
 
 if fichiers_charges:
     for uploaded_file in fichiers_charges:
-        st.write(f"### 📄 Analyse de : `{uploaded_file.name}`")
+        st.write(f"### 📄 Analyse en cours : `{uploaded_file.name}`")
         
         lignes = uploaded_file.readlines()
         brute, inconnus, roots = analyser_logs(lignes)
         
-        # Affichage moderne avec des cartes (st.metric)
+        # Tableaux de bord de sécurité dynamiques
         m1, m2, m3 = st.columns(3)
-        m1.metric(label="IP Brute Force", value=len(brute), delta="Alertes" if len(brute) > 0 else "RAS", delta_color="inverse")
-        m2.metric(label="Utilisateurs Invalides", value=len(inconnus))
-        m3.metric(label="Connexions Root", value=len(roots), delta="Critique" if len(roots) > 0 else "RAS", delta_color="inverse")
+        m1.metric(label="IP Intrusion / Force Brute", value=len(brute), delta="Alertes" if len(brute) > 0 else "RAS", delta_color="inverse")
+        m2.metric(label="Comptes Utilisateurs Invalides", value=len(inconnus))
+        m3.metric(label="Élévations de Privilèges Root", value=len(roots), delta="Critique" if len(roots) > 0 else "RAS", delta_color="inverse")
         
-        # Layout des détails
+        # Layout d'affichage
         col1, col2 = st.columns(2)
         with col1:
-            st.subheader("🔴 Activités Suspectes (IP)")
+            st.subheader("🔴 Activités Réseau Suspectes")
             if brute:
                 for ip, nb in brute.items():
                     if nb >= 3:
-                        st.error(f"🚨 **{ip}** : {nb} échecs (Alerte Brute Force)")
+                        st.error(f"🚨 **{ip}** : {nb} attaques (Alerte Intrusion)")
                     else:
-                        st.warning(f"⚠️ **{ip}** : {nb} échecs")
+                        st.warning(f"⚠️ **{ip}** : {nb} tentatives infructueuses")
             else:
-                st.success("Aucune IP suspecte trouvée.")
+                st.success("Aucune menace détectée sur ce flux.")
         
         with col2:
-            st.subheader("🔑 Accès Root Réussis")
+            st.subheader("🔑 Accès Root Systèmes")
             if roots:
                 for r in roots:
                     st.code(r[:70] + "...", language="bash")
             else:
-                st.success("Aucun accès root détecté.")
+                st.success("Aucune anomalie d'accès privilège.")
         
-        # Section Téléchargement
+        # Export du rapport AfriKore
         try:
             pdf_data = generer_pdf_web(brute, inconnus, roots, uploaded_file.name)
             st.download_button(
-                label=f"📥 Télécharger le Rapport PDF",
+                label=f"📥 Exporter le Rapport AfriKore PDF",
                 data=pdf_data,
-                file_name=f"CyberSentinel_{uploaded_file.name}.pdf",
+                file_name=f"AfriKore_Report_{uploaded_file.name}.pdf",
                 mime="application/pdf"
             )
         except Exception as e:
-            st.error(f"Erreur PDF : {e}. Vérifiez que 'fpdf2' est installé.")
+            st.error(f"Erreur d'export PDF : {e}.")
             
         st.divider()
 
-# Barre latérale informative pour les bourses / recruteurs
+# Barre latérale - Identité de Marque de l'Entreprise (L5 Vision)
 with st.sidebar:
     st.image("https://shields.io")
-    st.title("Framework de Validation")
+    st.title("Sovereign Security Hub")
     st.markdown("""
-    **CyberSentinel v1.0 (L1)**
-    - Analyse de logs SSH standard
-    - Détection brute force heuristique
-    - Extraction des élévations de privilèges
-    - Blacklist dynamique intégrée
+    **AfriKore Engine**
+    - Standard Core Log Parsing
+    - Heuristic Intrusion Detection
+    - Dynamic Threat Intelligence List
     ---
-    *© 2026 - Séraphin Mbala*
+    *« Protect Content, Empower Sovereign Infrastructure »*  
+    **© 2026 - Séraphin Mbala**
     """)
