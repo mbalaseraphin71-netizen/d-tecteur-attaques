@@ -81,7 +81,7 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     pdf.cell(50, 8, "COMPROMISSION" if connexions_root else "Aucune", border=1, align="C")
     pdf.ln(12)
 
-    # Tri par score de risque décroissant et limitation au Top 100 critiques
+    # CORRECTION : Alignement strict sur la variable 'resultats_analyse' passée en paramètre
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 8, "1. Evaluation Specifique des Hotes Critiques (Top 100)", ln=True)
     pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 190, pdf.get_y())
@@ -93,7 +93,7 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     else:
         ips_triees = sorted(
             resultats_analyse.items(),
-            key=lambda x: x[1].get("score", 0),
+            key=lambda x: x[1].get("score", 0) if isinstance(x[1], dict) else 0,
             reverse=True
         )
         for ip, data in ips_triees[:100]:
@@ -126,12 +126,8 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     pdf.set_font("Helvetica", "I", 9)
     pdf.multi_cell(0, 7, "Avis de conformite AfriKore : Ce document est un livrable d'audit automatique independant. Les donnees de telemetrie reseau sont cryptographiquement protegees sur nos infrastructures souveraines.", border=1, fill=True)
 
-    # --- ENCODAGE ET CONVERSION DE SÉCURITÉ STANDARD POUR STREAMLIT ---
-    # RECTIFICATION D'INDENTATION : Intégré de force dans la fonction principale
+    # Encodage et conversion de sécurité binaire pour Streamlit Cloud
     pdf_output = pdf.output(dest="S")
-    
     if isinstance(pdf_output, str):
         return pdf_output.encode("latin-1", errors="ignore")
-    
-    # Extraction propre et conversion explicite du bytearray en objet bytes pur via memoryview
     return bytes(memoryview(pdf_output))
