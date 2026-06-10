@@ -81,7 +81,7 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     pdf.cell(50, 8, "COMPROMISSION" if connexions_root else "Aucune", border=1, align="C")
     pdf.ln(12)
 
-    # CORRECTION 3 : Tri par score de risque décroissant et limitation au Top 100 critiques
+    # Tri par score de risque décroissant et limitation au Top 100 critiques
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 8, "1. Evaluation Specifique des Hotes Critiques (Top 100)", ln=True)
     pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 190, pdf.get_y())
@@ -105,7 +105,7 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
             flag_str = f" [{', '.join(flags)}]" if flags else ""
             pdf.cell(0, 7, f" - Hote : {ip} | Score: {data.get('score', 0)}/100 | Niveau: {data.get('niveau', 'INCONNU')}{flag_str}", ln=True)
 
-    # CORRECTION 2 : Traçabilité des accès Root sécurisée par multi_cell pour parer les logs longs
+    # Traçabilité des accès Root sécurisée par multi_cell pour parer les logs longs
     pdf.ln(5)
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 8, "2. Tracabilite des Acces Privileges Souverains (Root)", ln=True)
@@ -126,8 +126,10 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     pdf.set_font("Helvetica", "I", 9)
     pdf.multi_cell(0, 7, "Avis de conformite AfriKore : Ce document est un livrable d'audit automatique independant. Les donnees de telemetrie reseau sont cryptographiquement protegees sur nos infrastructures souveraines.", border=1, fill=True)
 
-    # CORRECTION 1 : Encodage PDF renforcé et résilient multi-versions
+    # --- SÉCURISATION DE L'INDENTATION DE SORTIE BINAIRE ---
     pdf_output = pdf.output(dest="S")
+    
     if isinstance(pdf_output, str):
-        pdf_output = pdf_output.encode("latin-1", errors="ignore")
-    return pdf_output
+        return pdf_output.encode("latin-1", errors="ignore")
+    
+    return bytes(pdf_output)
