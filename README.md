@@ -79,12 +79,12 @@ L3 : base de données + authentification
 L4 : threat intelligence API
 L5 : SOAR automatisé
 
-##  Author
 
+##  Author
 Séraphin Mbala
 Cybersecurity Engineering Path
 © 2026
----
+
 
 
 
