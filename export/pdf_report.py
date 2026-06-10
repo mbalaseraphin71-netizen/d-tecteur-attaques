@@ -126,10 +126,12 @@ def generer_pdf_web(resultats_analyse, connexions_root, blacklist_impact, nom_lo
     pdf.set_font("Helvetica", "I", 9)
     pdf.multi_cell(0, 7, "Avis de conformite AfriKore : Ce document est un livrable d'audit automatique independant. Les donnees de telemetrie reseau sont cryptographiquement protegees sur nos infrastructures souveraines.", border=1, fill=True)
 
-    # --- SÉCURISATION DE L'INDENTATION DE SORTIE BINAIRE ---
+    # --- ENCODAGE ET CONVERSION DE SÉCURITÉ STANDARD POUR STREAMLIT ---
+    # RECTIFICATION D'INDENTATION : Intégré de force dans la fonction principale
     pdf_output = pdf.output(dest="S")
     
     if isinstance(pdf_output, str):
         return pdf_output.encode("latin-1", errors="ignore")
     
-    return bytes(pdf_output)
+    # Extraction propre et conversion explicite du bytearray en objet bytes pur via memoryview
+    return bytes(memoryview(pdf_output))
