@@ -56,14 +56,15 @@ L2 : SIEM complet + dashboard
 L3 : base de données + authentification
 L4 : threat intelligence API
 L5 : SOAR automatisé
-🇬🇧 English Version
- Overview
 
-## AfriKore Security is a Python-based cybersecurity framework and SIEM system designed for real-time log analysis and threat detection.
+## 🇬🇧 English Version
+ ##  Overview
+
+ AfriKore Security is a Python-based cybersecurity framework and SIEM system designed for real-time log analysis and threat detection.
 
 It works in offline and critical environments (air-gapped systems).
 
- ##Features
+ ##  Features
 SSH brute-force detection
 System log analysis
 Invalid user detection
@@ -72,13 +73,13 @@ IP risk scoring engine
 Automatic blacklist system
 PDF incident reporting
 Interactive Streamlit dashboard
- ##Architecture
+ ##  Architecture
 Regex-based parsing engine
 IPv4 / IPv6 validation layer
 Sliding window detection (60s)
 IP reputation engine (O(1))
 PDF reporting via fpdf2
-## Installation
+##  Installation
 git clone https://github.com/your-repo/afrikore-security
 cd AfriKore-Security
 
@@ -90,7 +91,7 @@ L2: full SIEM dashboard
 L3: database + RBAC
 L4: threat intelligence APIs
 L5: SOAR automation
-##Author
+##  Author
 
 Séraphin Mbala
 Cybersecurity Engineering Path
