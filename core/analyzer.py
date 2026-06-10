@@ -1,67 +1,291 @@
 import re
+import uuid
+import ipaddress
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from collections import deque, defaultdict
+from typing import Optional, Dict, Any
+
 from core.blacklist import charger_blacklist
 from core.scoring import calculer_score_risque, classifier_menace
 
-def analyser_logs(logs):
-    """Moteur SIEM découplé - Analyse Dual-Stack et Corrélation temporelle."""
-    brute_force_counts = {}
-    connexions_root = []
-    ip_blacklistees_detectees = set()
-    statistiques_ip = {}
 
-    blacklist = charger_blacklist()
-    
-    # Expressions régulières de niveau production (IPv4 stricte et IPv6 complète)
-    regex_ipv4 = r'\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b'
-    regex_ipv6 = r'\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b(?:[0-9a-fA-F]{1,4}:){1,7}:|::(?:[0-9a-fA-F]{1,4}:){0,7}[0-9a-fA-F]{1,4}\b'
+# ==============================================================================
+# 1. MODÈLES DE DONNÉES ÉVÉNEMENTIELS
+# ==============================================================================
 
-    for index, ligne in enumerate(logs):
-        if isinstance(ligne, bytes):
-            ligne = ligne.decode("utf-8", errors="ignore")
-        
-        ligne_min = ligne.lower()
-        ip_trouvee = re.search(regex_ipv4, ligne) or re.search(regex_ipv6, ligne)
-        
-        if ip_trouvee:
-            ip = ip_trouvee.group()
-            est_blacklistee = ip in blacklist
-            
-            if est_blacklistee:
-                ip_blacklistees_detectees.add(ip)
-                
-            est_failed = "failed" in ligne_min or "authentication failure" in ligne_min
-            est_root = "root" in ligne_min
-            
-            if est_failed:
-                if ip not in statistiques_ip:
-                    statistiques_ip[ip] = {"failed": 0, "root_targeted": False, "lines": []}
-                
-                statistiques_ip[ip]["failed"] += 1
-                statistiques_ip[ip]["lines"].append(index)
-                if est_root:
-                    statistiques_ip[ip]["root_targeted"] = True
+class ActionType(Enum):
+    AUTH_FAILURE = "auth_failure"
+    AUTH_SUCCESS = "auth_success"
+    ROOT_ACCESS = "root_access"
+    UNKNOWN = "unknown"
 
-        if "accepted" in ligne_min and "root" in ligne_min:
-            connexions_root.append(ligne.strip())
 
-    # Calcul de corrélation de vélocité (Fenêtre glissante)
-    resultats_analyse = {}
-    for ip, data in statistiques_ip.items():
-        est_rafale = False
-        if len(data["lines"]) >= 3:
-            if (data["lines presidential"] if "presidential" in data else data["lines"][-1] - data["lines"][0]) < 20:
-                est_rafale = True
-                
-        est_bl = ip in blacklist
-        score = calculer_score_risque(data["failed"], data["root_targeted"], est_bl, est_rafale)
-        niveau = classifier_menace(score)
-        
-        resultats_analyse[ip] = {
-            "tentatives": data["failed"],
-            "score": score,
-            "niveau": niveau,
-            "est_rafale": est_rafale,
-            "cible_root": data["root_targeted"]
+class ServiceType(Enum):
+    SSH = "ssh"
+    UNKNOWN = "unknown"
+
+
+def generate_event_id() -> str:
+    """Génère un identifiant unique de traçabilité cyber par événement."""
+    return f"EVT-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8]}"
+
+
+@dataclass
+class SecurityEvent:
+    timestamp: Optional[datetime]
+    source_ip: str
+    user: str
+    action: ActionType
+    service: ServiceType
+    raw_line: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    event_id: str = field(default_factory=generate_event_id)
+
+
+# ==============================================================================
+# 2. PARSER GESTIONNAIRE DU PROTOCOLE SSH
+# ==============================================================================
+
+class BaseParser:
+    def validate_ip(self, ip: str) -> bool:
+        """Validation réseau stricte via la bibliothèque native ipaddress."""
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except Exception:
+            return False
+
+    def parse_timestamp(self, ts: Optional[str]) -> datetime:
+        if not ts:
+            return datetime.now()
+
+        year = datetime.now().year
+        formats = [
+            "%b %d %H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+            "%d/%b/%Y:%H:%M:%S"
+        ]
+
+        for fmt in formats:
+            try:
+                if "%Y" not in fmt:
+                    return datetime.strptime(f"{year} {ts}", f"{year} {fmt}")
+                return datetime.strptime(ts, fmt)
+            except Exception:
+                continue
+
+        return datetime.now()
+
+
+class SSHLogParser(BaseParser):
+    def __init__(self):
+        # Signature de capture OpenSSH unifiée (supporte les PID système et dates)
+        self.pattern = re.compile(
+            r'(?P<timestamp>\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}).*'
+            r'sshd(?:\[\d+\]|:).*'
+            r'(Failed password for (?P<fail_user>\S+)|'
+            r'Invalid user (?P<invalid_user>\S+)|'
+            r'Accepted .* for (?P<ok_user>\S+)).*'
+            r'from (?P<ip>[\da-fA-F\.:]+).*port (?P<port>\d+)'
+        )
+
+    def parse(self, line: str) -> Optional[SecurityEvent]:
+        if not line:
+            return None
+
+        m = self.pattern.search(line)
+        if not m:
+            return None
+
+        ip = m.group("ip")
+        if not self.validate_ip(ip):
+            return None
+
+        user = (
+            m.group("fail_user")
+            or m.group("invalid_user")
+            or m.group("ok_user")
+            or "unknown"
+        )
+
+        is_success = m.group("ok_user") is not None
+
+        # Détermination stricte du type d'action cyber
+        if is_success and user == "root":
+            action = ActionType.ROOT_ACCESS
+        elif is_success:
+            action = ActionType.AUTH_SUCCESS
+        else:
+            action = ActionType.AUTH_FAILURE
+
+        port = int(m.group("port")) if m.group("port").isdigit() else 0
+
+        return SecurityEvent(
+            timestamp=self.parse_timestamp(m.group("timestamp")),
+            source_ip=ip,
+            user=user,
+            action=action,
+            service=ServiceType.SSH,
+            raw_line=line,
+            metadata={"port": port}
+        )
+
+
+class ParserRouter:
+    def __init__(self):
+        self.parsers = [SSHLogParser()]
+
+    def parse(self, line: str) -> Optional[SecurityEvent]:
+        for p in self.parsers:
+            ev = p.parse(line)
+            if ev:
+                return ev
+        return None
+
+
+# ==============================================================================
+# 3. DETECTEUR DE BURST (MÉMOIRE BORNÉE CYBER)
+# ==============================================================================
+
+class BurstDetector:
+    def __init__(self, window=60, threshold=3, max_size=500):
+        self.window = timedelta(seconds=window)
+        self.threshold = threshold
+        # maxlen=500 protège le serveur contre la saturation de la RAM
+        self.data = defaultdict(lambda: deque(maxlen=max_size))
+
+    def analyze(self, event: SecurityEvent) -> Dict[str, Any]:
+        dq = self.data[event.source_ip]
+        dq.append(event.timestamp)
+
+        # Nettoyage de la fenêtre glissante temporelle (60 secondes)
+        while dq and (event.timestamp - dq[0]) > self.window:
+            dq.popleft()
+
+        count = len(dq)
+
+        return {
+            "is_burst": count >= self.threshold,
+            "event_count": count
         }
 
-    return resultats_analyse, connexions_root, list(ip_blacklistees_detectees)
+
+# ==============================================================================
+# 4. PROFILER D'ÉTATS TECHNIQUES COMPORTEMENTAUX
+# ==============================================================================
+
+class IPProfiler:
+    def __init__(self):
+        self.profiles = defaultdict(self._new)
+
+    def _new(self):
+        return {
+            "fail": 0,
+            "success": 0,
+            "root_targeted": False,
+            "root_success": False,
+            "users": set()
+        }
+
+    def update(self, event: SecurityEvent):
+        p = self.profiles[event.source_ip]
+
+        if event.action == ActionType.AUTH_FAILURE:
+            p["fail"] += 1
+            if event.user == "root":
+                p["root_targeted"] = True
+
+        elif event.action == ActionType.AUTH_SUCCESS:
+            p["success"] += 1
+
+        elif event.action == ActionType.ROOT_ACCESS:
+            p["root_success"] = True
+
+        p["users"].add(event.user)
+        return p
+
+
+# ==============================================================================
+# 5. MOTEUR CENTRAL SIEM ET GESTIONNAIRE DU PIPELINE
+# ==============================================================================
+
+class SIEMEngine:
+    def __init__(self):
+        self.router = ParserRouter()
+        self.profiler = IPProfiler()
+        self.burst = BurstDetector()
+
+        raw_bl = charger_blacklist()
+        self.blacklist = set(raw_bl or [])
+
+        self.results = {}
+        self.root_success_lines = []
+        self.blacklist_detected = set()
+
+    def ingest(self, line: str):
+        ev = self.router.parse(line)
+        if not ev:
+            return None
+
+        profile = self.profiler.update(ev)
+        burst = self.burst.analyze(ev)
+
+        if ev.action == ActionType.ROOT_ACCESS:
+            self.root_success_lines.append(ev.raw_line)
+
+        is_blacklisted = ev.source_ip in self.blacklist
+        if is_blacklisted:
+            self.blacklist_detected.add(ev.source_ip)
+
+        # Liaison avec le modèle mathématique pondéré logarithmique officiel
+        score = calculer_score_risque(
+            nb_tentatives=profile["fail"],
+            est_root=profile["root_targeted"],
+            est_blacklistee=is_blacklisted,
+            est_rafale=burst["is_burst"],
+            connexion_root_reussie=profile["root_success"]
+        )
+
+        # Alignement total des clés de sortie attendues par app.py et pdf_report.py
+        self.results[ev.source_ip] = {
+            "tentatives": profile["fail"],
+            "score": score,
+            "niveau": classifier_menace(score),
+            "est_rafale": burst["is_burst"],
+            "cible_root": profile["root_targeted"],
+            "succes_root": profile["root_success"]
+        }
+
+        return ev
+
+
+# ==============================================================================
+# POINT D'ENTRÉE DU PACKAGE EXTRAC-INJECT
+# ==============================================================================
+
+def analyser_logs(logs):
+    engine = SIEMEngine()
+
+    for line in logs:
+        if isinstance(line, bytes):
+            line = line.decode("utf-8", errors="ignore")
+        engine.ingest(line)
+
+    return engine.results, engine.root_success_lines, list(engine.blacklist_detected)
+
+
+# ==============================================================================
+# BLOC DE TEST DE CONFORMITÉ
+# ==============================================================================
+if __name__ == "__main__":
+    logs_test = [
+        "Jun 09 10:00:01 server sshd[123]: Failed password for root from 192.168.1.50 port 2222",
+        "Jun 09 10:00:02 server sshd[123]: Failed password for root from 192.168.1.50 port 2222",
+        "Jun 09 10:00:03 server sshd[123]: Accepted password for root from 192.168.1.50 port 2222"
+    ]
+
+    res, roots, bl = analyser_logs(logs_test)
+    print("[-] Statut Architecture SIEM AfriKore v2.5 : PRODUCTION ACTIVE.")
+    print(res)
