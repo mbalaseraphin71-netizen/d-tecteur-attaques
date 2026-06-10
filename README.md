@@ -1,10 +1,97 @@
-# AfriKore Security : African Cyber Defense Framework & Log Analyzer🇫🇷 Version Française Présentation du ProjetAfriKore Security est un framework de cybersécurité souverain et une application web industrielle développée en Python. Conçu pour fonctionner au sein d'infrastructures critiques isolées (air-gapped), cet outil agit comme une console SIEM (Security Information and Event Management) modulaire. Il ingère les fichiers de logs d'authentification (ex: OpenSSH auth.log) en temps réel, exécute des corrélations heuristiques avancées, gère la réputation via un moteur de liste noire locale dynamique, et génère des rapports d'incidents de conformité au format PDF.Ce projet s'inscrit dans la validation des compétences pratiques du portfolio d'Ingénieur Cybersécurité - Étape L1/L2, avec une feuille de route stratégique s'étendant jusqu'au niveau L5 (Automatisation, SOAR & Détection ML).🛠️ Architecture Technique & Pipeline CyberL'application est structurée selon un modèle découplé et orienté objet pour garantir la performance :Couche Présentation UI (app.py) : Tableau de bord Streamlit hautement réactif gérant l'ingestion asynchrone multi-fichiers, équipé de contrôles défensifs limitant la taille (50 Mo) et le volume de traitement (100 000 lignes max) pour interdire toute saturation de la RAM.Ingestion & Routage (ParserRouter) : Découpage syntaxique haute fidélité via des expressions régulières natives compilées (re.compile), évitant les surcharges de calcul.Validation Réseau Stricte (BaseParser) : Validation de l'intégrité des adresses IPv4/IPv6 via la bibliothèque native ipaddress afin de bloquer l'empoisonnement des données (log injection).Analyse Comportementale Temps Réel (BurstDetector) : Détection des attaques par rafale (Burst) via une fenêtre glissante temporelle de 60 secondes stockée dans une file à mémoire bornée (deque(maxlen=500)).Moteur de Réputation Décentralisé (BlacklistManager) : Table de hachage locale (Set[str]) permettant des vérifications d'IoC instantanées en O(1) avec persistance dynamique pour l'auto-bannissement des attaquants.Moteur de Reporting Durci (AfriKorePDF) : Module de traitement de documents convertissant la télémétrie SIEM en rapports d'audits statiques cryptographiquement traçables via fpdf2, isolé de toute dépendance cloud externe. Fonctionnalités Opérationnelles1. Analyse Heuristique & Gestion des AlertesDétection de Brute Force SSH : Isolation automatique des adresses IP effectuant des tentatives répétées et infructueuses d'accès au serveur (ActionType.AUTH_FAILURE).Profilage d'Utilisateurs Invalides : Détection lexicale des tentatives d'accès via des comptes non enregistrés sur le système.Alerte Critique d'Élévation de Privilèges : Surveillance stricte et mise en avant immédiate de tous les accès réussis en tant qu'utilisateur root (ActionType.ROOT_ACCESS).2. Moteur de Réputation & Auto-Ban (SOAR L1)Contrôle de Réputation Local : Confrontation instantanée des adresses IP extraites avec la liste noire active (blacklist.txt).Bannissement Dynamique : Évaluation en temps réel du score de risque calculé par le SIEM. Si une adresse IP dépasse le seuil critique (par défaut ≥ 80), elle est automatiquement ajoutée à la blacklist et persistée sur disque sans doublon.3. Tableau de Bord Graphique & Matrice de RisquesMétriques Dynamiques : Cartes de scores interactives affichant le nombre total d'hôtes hostiles isolés (avec décompte delta des cas critiques), les correspondances de listes noires et le statut de compromission root.Analytique Pandas/Streamlit : Graphiques à barres natifs synthétisant en temps réel le Top 10 des adresses IP les plus agressives et la répartition globale des menaces.Extraction et Rendu Sécurisé (Top 100) : Alignement strict et déballage unifié des structures de données pour afficher le niveau de danger via un code couleur normalisé (Rouge CRITIQUE, Orange ÉLEVÉ, Bleu INFO), enrichi de tags contextuels (BURST, ROOT_ATTACK, ROOT_COMPROMISED).4. Reporting PDF Automatisé & DurcissementIndice de Risque Global : Affichage d'un macaron d'alerte visuel coloré selon la criticité moyenne évaluée sur l'infrastructure d'audit (Vert SÉCURISÉ / Orange ALERTE / Rouge CRITIQUE).Protection Anti-Crash par Désinfection de Log : Nettoyage systématique des logs bruts via filtrage strict ASCII pour parer l'exécution de caractères spéciaux hostiles.Export Mémoire Streamlit : Compilation directe du flux de données sous forme de tableau binaire (bytes) pour garantir le téléchargement immédiat et sans écriture temporaire sur disque.🇬🇧 English Version Project OverviewAfriKore Security is a sovereign enterprise-grade cybersecurity framework and web application engineered in Python. Tailored for deployment within air-gapped and critical national infrastructure networks, it operates as a lightweight, high-performance modular SIEM console (v2.5). It parses system and authentication log structures (such as OpenSSH auth.log dumps) in real-time to uncover hidden malicious behaviors, evaluate source IP reputation via a local threat intelligence engine, and output production-ready PDF compliance reports.This architecture serves as a production-grade validation for Cybersecurity & Sovereign Digital Infrastructure - Level L1/L2, with a strategic R&D path scaling up to L5 (SOAR, Threat Hunting & ML Detection).🛠️ Core Security Architecture & PipelineThe pipeline is designed using object-oriented, memory-efficient Python structures:UI Presentation Layer (app.py): Highly responsive Streamlit dashboard supporting asynchronous multi-file ingestion, armored with defensive thresholds restricting size (50 MB) and volumetric parsing limits (100,000 lines max) to prevent memory exhaustion vectors.Ingestion & In-Memory Routing (ParserRouter): High-fidelity line parsing executed through pre-compiled regular expressions (re.compile) to drastically reduce overhead.Network Input Sanitization (BaseParser): Cryptographic and network validation of structural IPv4/IPv6 strings leveraging native ipaddress tokens to prevent log injection vectors.Bounded-Memory Burst Detection (BurstDetector): Time-series window tracking (60-second sliding scale) enforced via an explicit double-ended queue constraint (deque(maxlen=500)).Decentralized Reputation Subsystem (BlacklistManager): High-performance in-memory hash set (Set[str]) mapping dangerous endpoints with optimized O(1) lookup complexity and automatic disk-committed blacklisting.Hardened Reporting Engine (AfriKorePDF): A zero-cloud compliance engine processing multi-log metadata into secure forensic PDF documents using fpdf2, removing external SaaS reporting dependencies. Production Features1. Threat Intelligence & ProfilingSSH Volumetric Brute Force Tracking: Automatic extraction and alerting on persistent failed authentication routines (ActionType.AUTH_FAILURE).Invalid Profile Mapping: Isolation and analysis of scans targeted at illegal, obsolete, or non-existent system usernames.Privilege Escalation Monitoring: Critical logging, real-time alerting, and strict visualization of successful root accounts takeovers (ActionType.ROOT_ACCESS).2. Local Reputation & Sovereign Auto-Ban (SOAR L1)Zero-Trust Reputation Engine: Immediate matching of active IPs against a localized threat intelligence feed (blacklist.txt).Heuristic Automated Ban: Real-time evaluation of telemetry risk scores. IPs exceeding the emergency risk threshold (default ≥ 80) are instantly blacklisted and committed to local storage without line duplication.3. Live Dashboard Analytics & Threat MatrixReactive KPI Scorecards: Real-time metric components summarizing isolated hostile machines (with live critical delta markers), blacklisted matches, and active root compromises.Pandas-Driven Visualizations: Native high-performance bar charts plotting the Top 10 aggressive endpoints alongside global calculated security tier distribution.Secure Forensic Rendering (Top 100): Defensive object-unpacking layer organizing targets into clear, color-coded components (Red CRITICAL, Orange HIGH, Blue INFO) coupled with infrastructure behavioral tags (BURST, ROOT_ATTACK, ROOT_COMPROMISED).4. Automated PDF Compliance AuditingGlobal Threat Indexing: Live computation of the system's average security status, outputting a dynamic color-coded banner based on the calculated risk weight.Forensic Log Cleansing: Mandatory ASCII filtering of raw strings to scrub hidden malicious encodings, coupled with a dynamic multi_cell block layout.Streamlit Binary Binding: Compilation of PDF documents directly into raw memory blocks (bytes) for cross-platform compliance and dynamic client-side downloads without cloud filesystem persistence.💻 Technical Stack & InstallationCore TechnologiesRuntime: Python 3.14+User Interface: Streamlit (Cloud & Air-gapped Desktop Deployments)Data Processing: Pandas (Dataframe restructuring & Visual Charts)Reporting Engine: fpdf2 (Robust corporate layout engine)Processing Framework: Native re, ipaddress, collections, os, and uuid.Local Deploymentbash# 1. Clone the secure repository
-git clone https://github.com
+#  AfriKore Security  
+### African Cyber Defense Framework & SIEM Engine
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
+![Status](https://img.shields.io/badge/Status-Active%20Development-green)
+![Security](https://img.shields.io/badge/Cybersecurity-SIEM-black)
+![License](https://img.shields.io/badge/License-Academic-lightgrey)
+
+---
+
+# 🇫🇷 Version Française
+
+##  Présentation
+
+AfriKore Security est un framework de cybersécurité et un système SIEM développé en Python.
+
+Il est conçu pour analyser des logs système en temps réel et détecter des attaques dans des environnements critiques ou hors-ligne.
+
+---
+
+##  Fonctionnalités
+
+- Détection brute force SSH
+- Analyse des logs système
+- Détection d’utilisateurs invalides
+- Surveillance des accès root
+- Score de risque des adresses IP
+- Blacklist locale automatique
+- Génération de rapports PDF
+- Dashboard interactif (Streamlit)
+
+---
+
+##  Architecture
+
+- Parser basé sur regex optimisées
+- Validation réseau IPv4 / IPv6
+- Détection via fenêtre glissante (60s)
+- Moteur de réputation IP (O(1))
+- Reporting PDF via fpdf2
+
+---
+
+##  Installation
+
+```bash
+git clone https://github.com/your-repo/afrikore-security
 cd AfriKore-Security
 
-# 2. Install Python dependencies
 pip install -r requirements.txt
+streamlit run app.py
+ Roadmap
+L1 : parsing logs + blacklist
+L2 : SIEM complet + dashboard
+L3 : base de données + authentification
+L4 : threat intelligence API
+L5 : SOAR automatisé
+🇬🇧 English Version
+ Overview
 
-# 3. Launch the SIEM Local Server
-python -m streamlit run app.py
-Use code with caution. Strategic Venture Roadmap (Enterprise Scaling)Phase L1 - Core Engine Initialization: Stabilization of regular expressions, implementation of the memory-bounded token parser, local blacklist.txt lookup, and foundational French/English documentation.Phase L2 - Stateful Auditing & SIEM Features: Object-oriented pipeline implementation (app.py UI v2.5), unique event forensic IDs (uuid), 60s sliding window algorithm (BurstDetector), dynamic risk classification matching, and an O(1) auto-ban engine (BlacklistManager).Phase L3 - Persistence & RBAC Access: Migration from runtime memory dictionaries to an embedded relational database (SQLite/PostgreSQL) for event archival. Implementation of a secure user authentication layer with Role-Based Access Control (RBAC).Phase L4 - External Threat Intelligence API: Integration of asynchronous API workers for dual-lookup verification (VirusTotal API hooks / AlienVault OTX) while preserving fallback modes for isolated networks.Phase L5 - Automated Incident Response (SOAR): Scripted automated remediation engine capable of generating native iptables / nftables blocking rules on the host firewall interface upon detection of a verified DANGER-ATTAQUE threat level.« Protect Content, Empower Sovereign Infrastructure »Engineered with absolute rigor by Séraphin Mbala | Future Cybersecurity Engineer & Tech Entrepreneur © 2026
+AfriKore Security is a Python-based cybersecurity framework and SIEM system designed for real-time log analysis and threat detection.
+
+It works in offline and critical environments (air-gapped systems).
+
+ Features
+SSH brute-force detection
+System log analysis
+Invalid user detection
+Root access monitoring
+IP risk scoring engine
+Automatic blacklist system
+PDF incident reporting
+Interactive Streamlit dashboard
+ Architecture
+Regex-based parsing engine
+IPv4 / IPv6 validation layer
+Sliding window detection (60s)
+IP reputation engine (O(1))
+PDF reporting via fpdf2
+⚙️ Installation
+git clone https://github.com/your-repo/afrikore-security
+cd AfriKore-Security
+
+pip install -r requirements.txt
+streamlit run app.py
+ Roadmap
+L1: log parsing + blacklist
+L2: full SIEM dashboard
+L3: database + RBAC
+L4: threat intelligence APIs
+L5: SOAR automation
+Author
+
+Séraphin Mbala
+Cybersecurity Engineering Path
+© 202
