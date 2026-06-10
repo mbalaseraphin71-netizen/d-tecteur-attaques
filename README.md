@@ -75,6 +75,7 @@ L2: full SIEM dashboard
 L3: database + RBAC
 L4: threat intelligence APIs
 L5: SOAR automation
+
 ##  Author
 
 Séraphin Mbala
