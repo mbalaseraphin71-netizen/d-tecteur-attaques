@@ -63,25 +63,6 @@ IPv4 / IPv6 validation layer
 Sliding window detection (60s)
 IP reputation engine (O(1))
 PDF reporting via fpdf2
-##  Installation
-git clone https://github.com/your-repo/afrikore-security
-cd AfriKore-Security
-
-pip install -r requirements.txt
-streamlit run app.py
- Roadmap
-L1: log parsing + blacklist
-L2: full SIEM dashboard
-L3: database + RBAC
-L4: threat intelligence APIs
-L5: SOAR automation
-
-##  Author
-
-Séraphin Mbala
-Cybersecurity Engineering Path
-© 2026
----
 
 ##  Installation
 
@@ -97,5 +78,14 @@ L2 : SIEM complet + dashboard
 L3 : base de données + authentification
 L4 : threat intelligence API
 L5 : SOAR automatisé
+
+##  Author
+
+Séraphin Mbala
+Cybersecurity Engineering Path
+© 2026
+---
+
+
 
 
